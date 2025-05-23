@@ -14,23 +14,23 @@ import google.generativeai as genai
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-
 def get_gemini_response(input_text, pdf_content, prompt):
     model = genai.GenerativeModel("gemini-1.5-flash")
     try:
-        response = model.generate_content([input_text, pdf_content[0], prompt])
+        response = model.generate_content([
+            {"text": input_text},
+            *pdf_content,
+            {"text": prompt}
+        ])
         return response.text
     except Exception as e:
         return f"Error generating response: {e}"
 
-# Function to process uploaded PDF
 def input_pdf_setup(uploaded_file):
     if uploaded_file is not None:
         try:
             images = pdf2image.convert_from_bytes(uploaded_file.read(), dpi=200)
             first_page = images[0]
-
-            
             img_byte_arr = io.BytesIO()
             first_page.save(img_byte_arr, format='JPEG')
             img_byte_arr = img_byte_arr.getvalue()
@@ -52,7 +52,6 @@ st.set_page_config(page_title="ATS Resume Expert")
 st.header("🤖 ATS Resume Analyzer")
 st.markdown("Upload your resume and provide a job description to receive AI-powered feedback.")
 
-
 input_text = st.text_area("Job Description", key="input")
 uploaded_file = st.file_uploader("Upload your resume (PDF only)", type=["pdf"])
 
@@ -66,7 +65,6 @@ submit3 = st.button("What keywords are missing")
 submit4 = st.button("Resume Score")
 
 
-
 input_prompt1 = """You are an experienced Technical Human Resource Manager with deep knowledge of ATS systems. Your task is to review the provided resume against the job description. Please provide:
 
 1. **Overall Assessment**: Professional evaluation of profile alignment
@@ -75,7 +73,7 @@ input_prompt1 = """You are an experienced Technical Human Resource Manager with 
 4. **ATS Compatibility**: Formatting and structure assessment
 5. **Recruiter Perspective**: What would catch a recruiter's attention
 
-Format your response with clear sections and actionable insights.""",
+Format your response with clear sections and actionable insights."""
 
 input_prompt2 = """As a seasoned Technical Recruiter and Career Advisor, provide a comprehensive skills analysis:
 
@@ -85,9 +83,9 @@ input_prompt2 = """As a seasoned Technical Recruiter and Career Advisor, provide
 4. **Recommended Resources**: Specific courses, certifications, or training
 5. **Timeline Suggestion**: Realistic timeline for skill development
 
-Focus on technical, analytical, and soft skills relevant to the position.""",
+Focus on technical, analytical, and soft skills relevant to the position."""
 
-input_prompt3 ="""You are an ATS Optimization Expert. Conduct a thorough keyword analysis:
+input_prompt3 = """You are an ATS Optimization Expert. Conduct a thorough keyword analysis:
 
 1. **Missing Keywords**: Essential terms not found in the resume
 2. **Keyword Density**: Current keyword usage assessment
@@ -95,7 +93,7 @@ input_prompt3 ="""You are an ATS Optimization Expert. Conduct a thorough keyword
 4. **Action Verbs**: Powerful verbs to include
 5. **Optimization Strategy**: How to naturally integrate keywords
 
-Provide specific examples of where and how to incorporate these keywords.""",
+Provide specific examples of where and how to incorporate these keywords."""
 
 input_prompt4 = """You are an ATS and HR Evaluation Specialist. Provide a detailed scoring analysis:
 
@@ -109,7 +107,8 @@ input_prompt4 = """You are an ATS and HR Evaluation Specialist. Provide a detail
 4. **Competitive Analysis**: How it compares to typical candidates
 5. **Priority Fixes**: Most impactful changes to make first
 
-Include specific examples and before/after suggestions.""",
+Include specific examples and before/after suggestions."""
+
 
 if submit1 or submit2 or submit3 or submit4:
     if uploaded_file is not None:
@@ -127,7 +126,6 @@ if submit1 or submit2 or submit3 or submit4:
 
             st.subheader("📝 AI Response")
             st.write(response)
-
         except Exception as e:
             st.error(f"❌ Error: {e}")
     else:
